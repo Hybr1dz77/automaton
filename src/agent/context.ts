@@ -36,6 +36,11 @@ export { DEFAULT_TOKEN_BUDGET };
 export function estimateTokens(text: string): number {
   const content = text ?? "";
   const legacyEstimate = Math.ceil(content.length / 4);
+  // Tokenizing very large repetitive strings can take minutes in js-tiktoken.
+  // Use a conservative upper estimate instead of blocking context assembly.
+  if (content.length > 10_000) {
+    return content.length;
+  }
   try {
     if (!tokenCounter) {
       tokenCounter = createTokenCounter();
